@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>100 Day Success Tracker</title>
+  <title>Smart Study System</title>
   <style>
     body {
       font-family: Arial;
@@ -11,15 +11,11 @@
       padding: 20px;
     }
 
-    h1 {
-      margin-bottom: 10px;
-    }
-
     .box {
       background: #1e293b;
       padding: 12px;
       margin: 10px auto;
-      width: 280px;
+      width: 300px;
       border-radius: 10px;
       text-align: left;
     }
@@ -34,74 +30,108 @@
       margin-top: 15px;
     }
 
-    .progress-container {
+    .progress-bar {
       width: 80%;
       height: 20px;
       background: #334155;
       margin: 20px auto;
       border-radius: 10px;
-      overflow: hidden;
     }
 
-    .progress-bar {
+    .fill {
       height: 100%;
       background: #22c55e;
       width: 0%;
     }
 
-    .stats {
-      margin-top: 15px;
+    .message {
+      margin-top: 20px;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
 
-<h1>🚀 100 Day Success Tracker</h1>
+<h1>🚀 Smart Study System</h1>
 
-<h2 id="day">Day 1 / 100</h2>
+<h2 id="day"></h2>
 
-<div class="box">
-  <label><input type="checkbox" id="ielts"> IELTS (1 task)</label>
-</div>
+<div id="plan"></div>
 
-<div class="box">
-  <label><input type="checkbox" id="java"> Java (1 concept)</label>
-</div>
+<button onclick="finishDay()">Finish Day</button>
 
-<div class="box">
-  <label><input type="checkbox" id="codechef"> CodeChef (2 problems)</label>
-</div>
-
-<div class="box">
-  <label><input type="checkbox" id="reading"> Read (10 pages)</label>
-</div>
-
-<button onclick="completeDay()">Complete Today</button>
-
-<div class="progress-container">
-  <div class="progress-bar" id="bar"></div>
+<div class="progress-bar">
+  <div class="fill" id="bar"></div>
 </div>
 
 <h3>Progress: <span id="percent">0%</span></h3>
+<h3>🔥 Streak: <span id="streak">0</span></h3>
 
-<div class="stats">
-  🔥 Streak: <span id="streak">0</span> days<br>
-  🏆 Best: <span id="best">0</span> days
-</div>
+<div class="message" id="msg"></div>
 
 <script>
 let totalDays = 100;
 
-let data = JSON.parse(localStorage.getItem("tracker")) || {
+let data = JSON.parse(localStorage.getItem("smart")) || {
   day: 1,
   progress: 0,
-  streak: 0,
-  best: 0
+  streak: 0
 };
 
-function updateUI() {
+// Encouragement messages
+let messages = [
+  "Good job. Keep going.",
+  "Consistency beats talent.",
+  "You are building your future.",
+  "Small steps, big results.",
+  "Stay disciplined."
+];
+
+// Knowledge bank
+let knowledge = [
+  "Word: Resilient = able to recover quickly from difficulties.",
+  "Java: JVM executes compiled bytecode.",
+  "Word: Consistency = doing something regularly.",
+  "Java: Array stores multiple values in one variable.",
+  "Tip: Practice improves retention."
+];
+
+// Plans
+function getPlan(day) {
+  if (day % 7 === 0) {
+    return [
+      "🔁 Revise Java topics",
+      "🔁 Re-solve problems",
+      "🔁 Review IELTS mistakes"
+    ];
+  }
+
+  let javaTopics = ["Basics", "Loops", "Arrays", "Strings"];
+  let topic = javaTopics[day % javaTopics.length];
+
+  return [
+    "📘 IELTS: 1 Reading + 1 Writing",
+    "💻 Java: " + topic,
+    "💻 Coding: 2 problems",
+    "📖 Read 10 pages"
+  ];
+}
+
+// Render plan
+function render() {
   document.getElementById("day").innerText =
     "Day " + data.day + " / " + totalDays;
+
+  let plan = getPlan(data.day);
+  let html = "";
+
+  plan.forEach((task, i) => {
+    html += `<div class="box">
+      <label><input type="checkbox" id="t${i}"> ${task}</label>
+    </div>`;
+  });
+
+  document.getElementById("plan").innerHTML = html;
 
   document.getElementById("percent").innerText =
     Math.floor(data.progress) + "%";
@@ -110,48 +140,46 @@ function updateUI() {
     data.progress + "%";
 
   document.getElementById("streak").innerText = data.streak;
-  document.getElementById("best").innerText = data.best;
 }
 
-function completeDay() {
-  let tasks = [
-    document.getElementById("ielts").checked,
-    document.getElementById("java").checked,
-    document.getElementById("codechef").checked,
-    document.getElementById("reading").checked
-  ];
+// Finish day
+function finishDay() {
+  let checkboxes = document.querySelectorAll("input[type=checkbox]");
+  let done = 0;
 
-  let done = tasks.filter(t => t).length;
+  checkboxes.forEach(cb => {
+    if (cb.checked) done++;
+  });
+
+  let total = checkboxes.length;
 
   if (done === 0) {
-    alert("Do at least something ❗");
+    alert("Do at least one task.");
     return;
   }
 
-  let progressGain = (done / tasks.length) * (100 / totalDays);
-
-  data.progress += progressGain;
+  let gain = (done / total) * (100 / totalDays);
+  data.progress += gain;
   data.day++;
 
-  // streak logic
-  if (done >= 2) {
+  if (done >= total / 2) {
     data.streak++;
-    if (data.streak > data.best) {
-      data.best = data.streak;
-    }
   } else {
     data.streak = 0;
   }
 
-  if (data.progress > 100) data.progress = 100;
+  localStorage.setItem("smart", JSON.stringify(data));
 
-  localStorage.setItem("tracker", JSON.stringify(data));
+  let msg = messages[Math.floor(Math.random() * messages.length)];
+  let know = knowledge[Math.floor(Math.random() * knowledge.length)];
 
-  alert("Progress updated ✅");
-  location.reload();
+  document.getElementById("msg").innerHTML =
+    msg + "<br><br>🧠 " + know;
+
+  setTimeout(() => location.reload(), 2000);
 }
 
-updateUI();
+render();
 </script>
 
 </body>
