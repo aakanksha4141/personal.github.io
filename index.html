@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My Study Dashboard</title>
+  <title>100 Day Success Tracker</title>
   <style>
     body {
       font-family: Arial;
@@ -12,97 +12,146 @@
     }
 
     h1 {
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
 
-    .links a {
-      display: inline-block;
-      margin: 10px;
-      padding: 12px 20px;
+    .box {
       background: #1e293b;
-      color: white;
-      text-decoration: none;
-      border-radius: 10px;
-    }
-
-    .links a:hover {
-      background: #334155;
-    }
-
-    .task {
+      padding: 12px;
       margin: 10px auto;
-      padding: 10px;
-      background: #1e293b;
-      width: 250px;
-      border-radius: 8px;
+      width: 280px;
+      border-radius: 10px;
       text-align: left;
     }
 
     button {
-      margin-top: 20px;
       padding: 10px 20px;
+      background: #22c55e;
       border: none;
       border-radius: 8px;
-      background: #22c55e;
       color: white;
       cursor: pointer;
+      margin-top: 15px;
+    }
+
+    .progress-container {
+      width: 80%;
+      height: 20px;
+      background: #334155;
+      margin: 20px auto;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: #22c55e;
+      width: 0%;
+    }
+
+    .stats {
+      margin-top: 15px;
     }
   </style>
 </head>
 <body>
 
-<h1>🚀 My Daily Dashboard</h1>
+<h1>🚀 100 Day Success Tracker</h1>
 
-<!-- Quick Links -->
-<div class="links">
-  <a href="https://www.codechef.com" target="_blank">CodeChef</a>
-  <a href="https://www.youtube.com" target="_blank">YouTube</a>
-  <a href="#">IELTS Practice</a>
-  <a href="#">Notes</a>
+<h2 id="day">Day 1 / 100</h2>
+
+<div class="box">
+  <label><input type="checkbox" id="ielts"> IELTS (1 task)</label>
 </div>
 
-<h2>Today's Tasks</h2>
-
-<div class="task">
-  <label><input type="checkbox" id="ielts"> IELTS Practice</label>
+<div class="box">
+  <label><input type="checkbox" id="java"> Java (1 concept)</label>
 </div>
 
-<div class="task">
-  <label><input type="checkbox" id="java"> Learn Java</label>
+<div class="box">
+  <label><input type="checkbox" id="codechef"> CodeChef (2 problems)</label>
 </div>
 
-<div class="task">
-  <label><input type="checkbox" id="codechef"> Solve CodeChef Problem</label>
+<div class="box">
+  <label><input type="checkbox" id="reading"> Read (10 pages)</label>
 </div>
 
-<div class="task">
-  <label><input type="checkbox" id="reading"> Read Book</label>
+<button onclick="completeDay()">Complete Today</button>
+
+<div class="progress-container">
+  <div class="progress-bar" id="bar"></div>
 </div>
 
-<button onclick="save()">Save Progress</button>
+<h3>Progress: <span id="percent">0%</span></h3>
+
+<div class="stats">
+  🔥 Streak: <span id="streak">0</span> days<br>
+  🏆 Best: <span id="best">0</span> days
+</div>
 
 <script>
-function save() {
-  const data = {
-    ielts: document.getElementById("ielts").checked,
-    java: document.getElementById("java").checked,
-    codechef: document.getElementById("codechef").checked,
-    reading: document.getElementById("reading").checked
-  };
+let totalDays = 100;
 
-  localStorage.setItem("myTasks", JSON.stringify(data));
-  alert("Saved ✅");
+let data = JSON.parse(localStorage.getItem("tracker")) || {
+  day: 1,
+  progress: 0,
+  streak: 0,
+  best: 0
+};
+
+function updateUI() {
+  document.getElementById("day").innerText =
+    "Day " + data.day + " / " + totalDays;
+
+  document.getElementById("percent").innerText =
+    Math.floor(data.progress) + "%";
+
+  document.getElementById("bar").style.width =
+    data.progress + "%";
+
+  document.getElementById("streak").innerText = data.streak;
+  document.getElementById("best").innerText = data.best;
 }
 
-window.onload = function() {
-  const saved = JSON.parse(localStorage.getItem("myTasks"));
-  if (saved) {
-    document.getElementById("ielts").checked = saved.ielts;
-    document.getElementById("java").checked = saved.java;
-    document.getElementById("codechef").checked = saved.codechef;
-    document.getElementById("reading").checked = saved.reading;
+function completeDay() {
+  let tasks = [
+    document.getElementById("ielts").checked,
+    document.getElementById("java").checked,
+    document.getElementById("codechef").checked,
+    document.getElementById("reading").checked
+  ];
+
+  let done = tasks.filter(t => t).length;
+
+  if (done === 0) {
+    alert("Do at least something ❗");
+    return;
   }
+
+  let progressGain = (done / tasks.length) * (100 / totalDays);
+
+  data.progress += progressGain;
+  data.day++;
+
+  // streak logic
+  if (done >= 2) {
+    data.streak++;
+    if (data.streak > data.best) {
+      data.best = data.streak;
+    }
+  } else {
+    data.streak = 0;
+  }
+
+  if (data.progress > 100) data.progress = 100;
+
+  localStorage.setItem("tracker", JSON.stringify(data));
+
+  alert("Progress updated ✅");
+  location.reload();
 }
+
+updateUI();
 </script>
 
 </body>
