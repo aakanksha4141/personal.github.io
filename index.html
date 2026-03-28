@@ -1,12 +1,109 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My Dashboard</title>
+  <title>My Study Dashboard</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .links a {
+      display: inline-block;
+      margin: 10px;
+      padding: 12px 20px;
+      background: #1e293b;
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+    }
+
+    .links a:hover {
+      background: #334155;
+    }
+
+    .task {
+      margin: 10px auto;
+      padding: 10px;
+      background: #1e293b;
+      width: 250px;
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #22c55e;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
-<h1>My Study Dashboard</h1>
-<p>This is working</p>
+<h1>🚀 My Daily Dashboard</h1>
+
+<!-- Quick Links -->
+<div class="links">
+  <a href="https://www.codechef.com" target="_blank">CodeChef</a>
+  <a href="https://www.youtube.com" target="_blank">YouTube</a>
+  <a href="#">IELTS Practice</a>
+  <a href="#">Notes</a>
+</div>
+
+<h2>Today's Tasks</h2>
+
+<div class="task">
+  <label><input type="checkbox" id="ielts"> IELTS Practice</label>
+</div>
+
+<div class="task">
+  <label><input type="checkbox" id="java"> Learn Java</label>
+</div>
+
+<div class="task">
+  <label><input type="checkbox" id="codechef"> Solve CodeChef Problem</label>
+</div>
+
+<div class="task">
+  <label><input type="checkbox" id="reading"> Read Book</label>
+</div>
+
+<button onclick="save()">Save Progress</button>
+
+<script>
+function save() {
+  const data = {
+    ielts: document.getElementById("ielts").checked,
+    java: document.getElementById("java").checked,
+    codechef: document.getElementById("codechef").checked,
+    reading: document.getElementById("reading").checked
+  };
+
+  localStorage.setItem("myTasks", JSON.stringify(data));
+  alert("Saved ✅");
+}
+
+window.onload = function() {
+  const saved = JSON.parse(localStorage.getItem("myTasks"));
+  if (saved) {
+    document.getElementById("ielts").checked = saved.ielts;
+    document.getElementById("java").checked = saved.java;
+    document.getElementById("codechef").checked = saved.codechef;
+    document.getElementById("reading").checked = saved.reading;
+  }
+}
+</script>
 
 </body>
 </html>
