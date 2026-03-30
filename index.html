@@ -25,70 +25,68 @@ button{padding:10px 20px;margin:10px;background:#22c55e;border:none;color:white;
 
 <script>
 
-let totalDays=30;
-let data=JSON.parse(localStorage.getItem("study"))||{day:1,done:0};
+let totalDays = 30;
+let data = JSON.parse(localStorage.getItem("study")) || { day: 1, done: 0 };
 
-// ===== FULL 30 DAY CONTENT =====
-let syllabus=[];
+let syllabus = [];
 
-for(let i=1;i<=30;i++){
+// ===== NEW REAL PLAN =====
+for (let i = 1; i <= 30; i++) {
+
 syllabus.push({
 
-reading:{
-title:"Reading Skill "+i,
-theory:"Understand passage structure and answer questions accurately.",
-steps:["Read title","Identify keywords","Match answers","Avoid traps"],
-example:"Question asks year → scan numbers in passage",
-task:"Solve 1 passage and check accuracy"
+entrance: {
+title: "Entrance Prep Day " + i,
+theory: "Focus on core CS subjects + MCQs.",
+steps: ["Revise concept", "Solve MCQs", "Analyze mistakes"],
+example: "Array question → check index logic",
+task: "Solve 50 MCQs (DS/DBMS/Aptitude)"
 },
 
-writing:{
-title:"Writing Skill "+i,
-theory:"Develop structured answers with clarity.",
-steps:["Write intro","Give overview","Add details","Use linking words"],
-example:"Overall, trend increased steadily.",
-task:"Write 5-8 sentences"
+project: {
+title: "Project Work Day " + i,
+theory: "Build Traffic Sign Recognition step by step.",
+steps: ["Learn concept", "Run code", "Test output"],
+example: "Input image → model predicts sign",
+task: i<=10 ? "Learn Python basics" :
+      i<=20 ? "Work on TensorFlow model" :
+              "Test + finalize project"
 },
 
-listening:{
-title:"Listening Skill "+i,
-theory:"Catch key information from audio.",
-steps:["Read questions first","Underline keywords","Listen carefully"],
-example:"Listen for numbers, names, places",
-task:"Practice 1 section"
+java: {
+title: "Java Learning Day " + i,
+theory: "Build coding from zero to basics.",
+steps: ["Understand", "Write code", "Practice"],
+example: i<=10 ? "int a=10;" :
+        i<=20 ? "Arrays example" :
+                "OOP class example",
+task: i<=10 ? "Learn variables, loops" :
+      i<=20 ? "Practice arrays & functions" :
+              "Learn OOP basics"
 },
 
-speaking:{
-title:"Speaking Skill "+i,
-theory:"Speak clearly with ideas and examples.",
-steps:["Start confidently","Expand answer","Give example"],
-example:"I enjoy reading because it improves knowledge.",
-task:"Speak for 1 minute"
+english: {
+title: "English Practice Day " + i,
+theory: "Improve speaking + listening.",
+steps: ["Listen", "Speak", "Learn words"],
+example: "Speak about your day",
+task: "Speak 10 mins + watch 1 video"
 },
-
-java:{
-title:"Java Topic "+i,
-theory:"Core programming concept for problem solving.",
-steps:["Understand concept","Write syntax","Practice example"],
-example:"int a=10;",
-task:"Write and run code"
-},
-
-question:"What is concept "+i+"?",
-vocab:"Word "+i+" = Meaning"
 
 });
+
+// END LOOP
 }
 
-// RENDER
+// ===== RENDER =====
 function render(){
 
-let d=data.day-1;
-if(d>=30) d=29;
+let d = data.day - 1;
+if(d >= 30) d = 29;
 
-let day=syllabus[d];
+let day = syllabus[d];
 
-document.getElementById("day").innerText="Day "+data.day+"/30";
+document.getElementById("day").innerText = "Day " + data.day + "/30";
 
 function box(title,obj){
 return `
@@ -104,32 +102,28 @@ return `
 }
 
 document.getElementById("content").innerHTML =
-box("📘 Reading",day.reading)+
-box("✍ Writing",day.writing)+
-box("🎧 Listening",day.listening)+
-box("🗣 Speaking",day.speaking)+
+box("🎯 Entrance",day.entrance)+
+box("🤖 Project",day.project)+
 box("💻 Java",day.java)+
-`<div class="box"><b>🧠 Question:</b> ${day.question}</div>
-<div class="box"><b>📚 Vocabulary:</b> ${day.vocab}</div>`;
+box("🗣 English",day.english);
 
 // progress
-let percent=Math.floor((data.done/totalDays)*100);
-document.getElementById("percent").innerText="Progress: "+percent+"%";
-document.getElementById("bar").style.width=percent+"%";
+let percent = Math.floor((data.done / totalDays) * 100);
+document.getElementById("percent").innerText = "Progress: " + percent + "%";
+document.getElementById("bar").style.width = percent + "%";
 
 }
 
-// FINISH
+// ===== FINISH DAY =====
 function finishDay(){
 data.done++;
 data.day++;
-localStorage.setItem("study",JSON.stringify(data));
+localStorage.setItem("study", JSON.stringify(data));
 location.reload();
 }
 
 render();
 
 </script>
-
 </body>
 </html>
