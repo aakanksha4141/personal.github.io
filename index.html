@@ -1,249 +1,135 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Study System</title>
-
+<title>Ultimate Study System</title>
 <style>
-body {
-  margin:0;
-  font-family:Arial;
-  background:linear-gradient(135deg,#020617,#0f172a,#1e293b);
-  color:white;
-  text-align:center;
-}
-
-h1 { margin-top:20px; }
-
-.tabs button{
-  padding:10px;
-  margin:5px;
-  border:none;
-  border-radius:6px;
-  background:#334155;
-  color:white;
-  cursor:pointer;
-}
-.tabs button.active{ background:#22c55e; }
-
-.section{ display:none; }
-.activeSection{ display:block; }
-
-.box{
-  background:#1e293b;
-  padding:12px;
-  margin:10px auto;
-  width:360px;
-  border-radius:10px;
-  text-align:left;
-}
-
-button.main{
-  background:#22c55e;
-  padding:10px 20px;
-  border:none;
-  border-radius:8px;
-  margin-top:15px;
-  color:white;
-  cursor:pointer;
-}
-
-.progress{
-  width:80%;
-  height:20px;
-  background:#334155;
-  margin:20px auto;
-  border-radius:10px;
-}
-.fill{
-  height:100%;
-  background:#22c55e;
-  width:0%;
-}
-
-#lockScreen{
-  position:fixed;
-  width:100%; height:100%;
-  background:#020617;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-}
-input{ padding:6px; }
+body{font-family:Arial;margin:0;background:#0f172a;color:white;text-align:center}
+.box{background:#1e293b;padding:12px;margin:10px auto;width:400px;border-radius:10px;text-align:left}
+button{padding:10px 20px;margin:10px;background:#22c55e;border:none;color:white;border-radius:6px}
+.progress{width:80%;height:20px;background:#334155;margin:20px auto;border-radius:10px}
+.fill{height:100%;background:#22c55e;width:0%}
 </style>
 </head>
 
 <body>
 
-<!-- LOCK -->
-<div id="lockScreen">
-  <h2>🔐 Enter PIN</h2>
-  <input type="password" id="pin">
-  <button onclick="unlock()">Unlock</button>
-</div>
-
-<h1>🚀 Study Dashboard</h1>
+<h1>🚀 Daily Study System</h1>
 <h2 id="day"></h2>
 
-<div class="tabs">
-<button onclick="showTab('reading')" class="active">Reading</button>
-<button onclick="showTab('writing')">Writing</button>
-<button onclick="showTab('listening')">Listening</button>
-<button onclick="showTab('speaking')">Speaking</button>
-</div>
+<div id="content"></div>
 
-<div id="reading" class="section activeSection"></div>
-<div id="writing" class="section"></div>
-<div id="listening" class="section"></div>
-<div id="speaking" class="section"></div>
-
-<div id="other"></div>
-
-<button class="main" onclick="finishDay()">Finish Day</button>
+<button onclick="finishDay()">Finish Day</button>
 
 <div class="progress"><div class="fill" id="bar"></div></div>
-<h3>Progress: <span id="percent"></span></h3>
-<h3>🔥 Streak: <span id="streak"></span></h3>
-
-<div id="result"></div>
-<div id="mistakesBox"></div>
+<h3 id="percent"></h3>
 
 <script>
 
-// LOCK
-let pin = localStorage.getItem("pin") || "1234";
-function unlock(){
-  if(document.getElementById("pin").value === pin){
-    document.getElementById("lockScreen").style.display="none";
-  } else alert("Wrong PIN");
-}
+let totalDays=30;
+let data=JSON.parse(localStorage.getItem("study"))||{day:1,done:0};
 
-// DATA
-let totalDays = 30;
-let data = JSON.parse(localStorage.getItem("study")) || {
-  day:1,
-  completedDays:0,
-  streak:0,
-  mistakes:[]
-};
+// ===== FULL 30 DAY CONTENT =====
+let syllabus=[];
 
-// IELTS DATA (30 days)
-let reading = ["Skimming","Scanning","Keywords","T/F/NG","Headings","Sentence","Summary","Table","Flowchart","Diagram","Short answer","MCQ","Yes/No","Passage1","Passage2","Passage3","Time","Traps","Vocab","Paraphrasing","Speed","Accuracy","Full1","Full2","Errors","Weak","Advanced","Mixed","Revision","Mock"];
+for(let i=1;i<=30;i++){
+syllabus.push({
 
-let writing = ["Intro","Overview","Data","Linking","Bar","Line","Pie","Table","Map","Process","Practice","Timed","Intro2","Opinion","Discussion","Adv","Problems","Solutions","Structure","Linking2","Vocab","Coherence","Practice2","Timed2","Errors","Band","Weak","Mixed","Revision","Mock"];
+reading:{
+title:"Reading Skill "+i,
+theory:"Understand passage structure and answer questions accurately.",
+steps:["Read title","Identify keywords","Match answers","Avoid traps"],
+example:"Question asks year → scan numbers in passage",
+task:"Solve 1 passage and check accuracy"
+},
 
-let listening = ["Keywords","Numbers","S1","S2","S3","S4","Map","MCQ","Sentence","Table","Matching","Notes","Short","Distractors","Accent","Speed","Full1","Full2","Errors","Weak","Advanced","Mixed","Prediction","Focus","Tips","Revision","Mock","Mock2","Final","Test"];
+writing:{
+title:"Writing Skill "+i,
+theory:"Develop structured answers with clarity.",
+steps:["Write intro","Give overview","Add details","Use linking words"],
+example:"Overall, trend increased steadily.",
+task:"Write 5-8 sentences"
+},
 
-let speaking = ["Intro","Personal","Fluency","Pronunciation","Cue card","Long","Story","Opinion","Examples","Part3","Followup","Confidence","Vocab","Grammar","Record","Review","Mock1","Mock2","Errors","Weak","Advanced","Idioms","Complex","Speed","Tone","Revision","Full","Full2","Final","Test"];
+listening:{
+title:"Listening Skill "+i,
+theory:"Catch key information from audio.",
+steps:["Read questions first","Underline keywords","Listen carefully"],
+example:"Listen for numbers, names, places",
+task:"Practice 1 section"
+},
 
-let java = ["Intro","Variables","Operators","If","Loops","Patterns","Rev","Arrays","ArrayQ","Strings","StringQ","Methods","Recursion","Rev","Classes","Constructors","Inheritance","Polymorphism","Encapsulation","Abstraction","Rev","ArrayList","HashMap","Exception","File","DSA","Practice","Rev","Mock","Mock"];
+speaking:{
+title:"Speaking Skill "+i,
+theory:"Speak clearly with ideas and examples.",
+steps:["Start confidently","Expand answer","Give example"],
+example:"I enjoy reading because it improves knowledge.",
+task:"Speak for 1 minute"
+},
 
-let questions = ["JVM?","Variable?","Loop?","Array?","OOP?","Class?","Object?","Inheritance?","Polymorphism?","Encapsulation?","Abstraction?","Exception?","ArrayList?","HashMap?","Recursion?","Method?","File?","DSA?","Algorithm?","Debugging?","Syntax?","Compiler?","Runtime?","Input?","Output?","Logic?","Condition?","Iteration?","Memory?","CPU?"];
+java:{
+title:"Java Topic "+i,
+theory:"Core programming concept for problem solving.",
+steps:["Understand concept","Write syntax","Practice example"],
+example:"int a=10;",
+task:"Write and run code"
+},
 
-let vocab = ["Analyze","Persist","Enhance","Efficient","Complex","Maintain","Focus","Adapt","Logic","Structure","Implement","Debug","Compile","Syntax","Output","Input","Process","Function","Variable","Loop","Condition","Memory","Speed","Accuracy","Effort","Goal","Plan","Result","Improve","Practice"];
+question:"What is concept "+i+"?",
+vocab:"Word "+i+" = Meaning"
 
-// TAB
-function showTab(id){
-document.querySelectorAll(".section").forEach(s=>s.classList.remove("activeSection"));
-document.getElementById(id).classList.add("activeSection");
-document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
-event.target.classList.add("active");
+});
 }
 
 // RENDER
 function render(){
 
-let i = data.day-1;
-if(i>29) i=29;
+let d=data.day-1;
+if(d>=30) d=29;
+
+let day=syllabus[d];
 
 document.getElementById("day").innerText="Day "+data.day+"/30";
 
-function box(title,task,id){
-return `<div class="box">
-<b>${title}</b><br>${task}<br>
-<input type="checkbox" id="${id}"> Done
-<input type="checkbox" id="${id}m"> Mistake
+function box(title,obj){
+return `
+<div class="box">
+<b>${title}: ${obj.title}</b><br><br>
+<b>What:</b> ${obj.theory}<br><br>
+<b>Steps:</b>
+<ul>${obj.steps.map(s=>"<li>"+s+"</li>").join("")}</ul>
+<b>Example:</b> ${obj.example}<br><br>
+<b>Task:</b> ${obj.task}<br>
+<input type="checkbox"> Done
 </div>`;
 }
 
-document.getElementById("reading").innerHTML = box("📘 Reading",reading[i],"r");
-document.getElementById("writing").innerHTML = box("✍ Writing",writing[i],"w");
-document.getElementById("listening").innerHTML = box("🎧 Listening",listening[i],"l");
-document.getElementById("speaking").innerHTML = box("🗣 Speaking",speaking[i],"s");
-
-document.getElementById("other").innerHTML =
-box("💻 Java",java[i],"j") +
-box("💻 Coding","2 problems","c") +
-box("📖 Reading","10 pages","rd") +
-`<div class="box"><b>🧠 Question</b><br>${questions[i]}</div>
-<div class="box"><b>📚 Vocab</b><br>${vocab[i]}</div>`;
+document.getElementById("content").innerHTML =
+box("📘 Reading",day.reading)+
+box("✍ Writing",day.writing)+
+box("🎧 Listening",day.listening)+
+box("🗣 Speaking",day.speaking)+
+box("💻 Java",day.java)+
+`<div class="box"><b>🧠 Question:</b> ${day.question}</div>
+<div class="box"><b>📚 Vocabulary:</b> ${day.vocab}</div>`;
 
 // progress
-let percent=Math.floor((data.completedDays/totalDays)*100);
-document.getElementById("percent").innerText=percent+"%";
+let percent=Math.floor((data.done/totalDays)*100);
+document.getElementById("percent").innerText="Progress: "+percent+"%";
 document.getElementById("bar").style.width=percent+"%";
-document.getElementById("streak").innerText=data.streak;
-
-// mistakes
-let html="<h3>⚠ Mistakes</h3>";
-if(data.mistakes.length===0){
-html+="No mistakes";
-}else{
-data.mistakes.slice(-5).forEach(m=>{
-html+=`<div class="box">Day ${m.day}: ${m.items.join(",")}</div>`;
-});
-}
-document.getElementById("mistakesBox").innerHTML=html;
-
-// weak areas
-let count={};
-data.mistakes.forEach(m=>{
-m.items.forEach(i=>{
-count[i]=(count[i]||0)+1;
-});
-});
-let weak = Object.entries(count).sort((a,b)=>b[1]-a[1]).slice(0,3);
-if(weak.length){
-document.getElementById("mistakesBox").innerHTML += "<br><b>Weak:</b> "+weak.map(x=>x[0]).join(",");
-}
 
 }
 
 // FINISH
 function finishDay(){
-
-let tasks=["r","w","l","s","j","c","rd"];
-let done=0;
-let mistakesToday=[];
-
-tasks.forEach(id=>{
-if(document.getElementById(id).checked) done++;
-if(document.getElementById(id+"m")?.checked) mistakesToday.push(id);
-});
-
-if(done===0){ alert("Do at least 1"); return; }
-
-if(mistakesToday.length>0){
-data.mistakes.push({day:data.day,items:mistakesToday});
-}
-
-if(done>=3){
-data.completedDays++;
-data.streak++;
-}else{
-data.streak=0;
-}
-
+data.done++;
 data.day++;
 localStorage.setItem("study",JSON.stringify(data));
-
-document.getElementById("result").innerHTML="<br>Good. Come back tomorrow stronger.";
-
-setTimeout(()=>location.reload(),2000);
+location.reload();
 }
 
 render();
 
 </script>
+
 </body>
 </html>
